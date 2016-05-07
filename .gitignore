@@ -1,0 +1,21 @@
+/target
+/lib
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+
+# VIM
+*.swo
+*.swp
+
+# OSX
+.DS_Store
+
+# IntelliJ
+.idea/
+*.iml
