@@ -23,11 +23,15 @@
 (defn hello-world []
   (response {:message "Hello, world!"}))
 
-(defn get-favorites [] @favorites)
+(defn get-beers-by-ids [ids]
+  (:body (http-client/get beers-uri {:as :json :query-params {"id" (join "," ids)}})))
+
+(defn get-favorites []
+  (map #(assoc % :beers (get-beers-by-ids (:beers %)))
+       @favorites))
 
 (defn get-favorites-by-username [username]
-  (let [user-favorite-ids (:beers (first (filter #(= (:username %) username) @favorites)))]
-    (:body (http-client/get beers-uri {:as :json :query-params {"id" (join "," user-favorite-ids)}}))))
+  (get-beers-by-ids (:beers (first (filter #(= (:username %) username) @favorites)))))
 
 (defroutes app-routes
            (GET "/" [] (hello-world))
