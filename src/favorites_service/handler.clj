@@ -7,7 +7,13 @@
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
     [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
     [ring.middleware.cors :refer [wrap-cors]]
+    [clojure.java.jdbc :as sql]
     [clj-http.client :as http-client]))
+
+(def db-spec {:subprotocol "postgresql"
+              :subname     "//localhost:26257/favorites"
+              :user        "root"
+              :password    ""})
 
 (def beer-service-uri (or (System/getenv "BEER_SERVICE_URI")
                           "http://localhost:8080"))
@@ -24,18 +30,22 @@
   (response {:message "Hello, world!"}))
 
 (defn get-beers-by-ids [ids]
-  (:body (http-client/get beers-uri {:as :json :query-params {"id" (join "," ids)}})))
+  (let [query-id (join "," ids)]
+    (:body (http-client/get beers-uri {:as           :json
+                                       :query-params {"id" query-id}}))))
 
-(defn get-favorites []
-  (map #(assoc % :beers (get-beers-by-ids (:beers %)))
-       @favorites))
+(defn get-beer-ids-by-username [username]
+  (map #(:beer_id %)
+       (sql/query db-spec ["select beer_id from favorites where username = ?" username])))
 
 (defn get-favorites-by-username [username]
-  (get-beers-by-ids (:beers (first (filter #(= (:username %) username) @favorites)))))
+  (let [ids (get-beer-ids-by-username username)]
+    (if (empty? ids)
+      []
+      (get-beers-by-ids ids))))
 
 (defroutes app-routes
            (GET "/" [] (hello-world))
-           (GET "/favorites" [] (response (get-favorites)))
            (GET "/favorites/:username" [username]
              (response (get-favorites-by-username username)))
            (route/not-found "Not Found"))

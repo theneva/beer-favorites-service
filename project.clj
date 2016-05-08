@@ -7,7 +7,9 @@
                  [ring/ring-defaults "0.1.5"]
                  [ring/ring-json "0.4.0"]
                  [ring-cors "0.1.7"]
-                 [clj-http "3.0.1"]]
+                 [clj-http "3.0.1"]
+                 [org.clojure/java.jdbc "0.6.0-rc1"]
+                 [postgresql "9.3-1102.jdbc41"]]
   :plugins [[lein-ring "0.9.7"]]
   :ring {:handler favorites-service.handler/app}
   :profiles
